@@ -1,29 +1,15 @@
 <script>
-    let name = "Arnav";
-    let count = 0
-    function addCount(){
-        count+=1
-    }
+	let user = { loggedIn: false };
+
+	function toggle() {
+		user.loggedIn = !user.loggedIn;
+	}
 </script>
 
-<h1>Welcome to {name}'s website</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+{#if user.loggedIn}
+	<button on:click={toggle}> Log out </button>
+{/if}
 
-<button on:click={addCount}>
-    click me!
-</button>
-
-<div>
-    the count is {count}
-</div>
-
-<style>
-    div{
-        padding: 10px;
-        border-radius: 0.25em;
-        background: whitesmoke;
-        border: 2px solid yellowgreen;
-        width: 400px;
-        margin-top: 30px; 
-    }
-</style>
+{#if !user.loggedIn}
+	<button on:click={toggle}> Log in </button>
+{/if}
