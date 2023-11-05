@@ -1,27 +1,25 @@
 <script>
-	let user = { loggedIn: false };
+	let values = [
+		{done:false, name:"world domination"},
+		{done:false, name:"world domination 2"},
+		{done:false, name:"world domination 3"},
+		{done:false, name:"make a svelte app"}
+	]
 
-	function toggle() {
-		user.loggedIn = !user.loggedIn;
+	function add(){
+		values.push({done:false, name:"What should be done?"})
+		values = values
 	}
+	
 </script>
 
-<h1>User State: <span style="color:{user.loggedIn?"yellow":"green"}">Logged {user.loggedIn?"in":"out"}</span></h1>
-{#if user.loggedIn}
-	<button on:click={toggle}> Log out </button>
-{/if}
+{#each values as value}
+	<div style="opacity:{value.done?"0.4":"1"}">
+		<input type="checkbox" bind:checked={value.done}>
+		<input bind:value={value.name}>
+	</div>
+{/each}
 
-{#if !user.loggedIn}
-	<button on:click={toggle}> Log in </button>
-{/if}
-
-<style>
-    :root{
-        background: rgb(25,25,25);
-    }
-    
-    h1{
-        margin: 0;
-        font-family: sans-serif;
-    }
-</style>
+<button on:click={add}>
+	Add more
+</button>
