@@ -1,5 +1,5 @@
 async function postData(uid, sql) {
-  url = "https://arnavdb-manager.arnavium.workers.dev"
+  const url = "https://arnavdb-manager.arnavium.workers.dev"
   const response = await fetch(url, {
     method: "GET",
     mode: "cors", // no-cors, *cors, same-origin
@@ -14,44 +14,84 @@ async function postData(uid, sql) {
     redirect: "follow", // manual, *follow, error
     referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
   });
-  
-  response.text().then(function (text) {
-    console.log(text)
-  });
-}
+  return response.text().then(function (responseText) {return responseText})
 
+}
 function runSQL(uid, sql){
-  if(uid){
-    sql = sql.split("FROM ").join(`FROM ${uid}_`)
-  } else {
-    throw Error("No uid specified on function 'runSQL'")
+  switch(uid, sql){
+    case !uid&&!sql:{
+      throw Error("No uid or sql specified on function 'runSQL'")
+    }
+    case uid&&!sql:{
+      throw Error("No sql specified on function 'runSQL'")
+    }
+    case !uid&& sql:{
+      throw Error("No uid specified on function 'runSQL'")
+    }
+    case uid&& sql:{
+      sql = sql.split("FROM ").join(`FROM ${uid}_`)
+      return parseOutput(uid, postData(uid, sql))
+    }
+    default:{
+      throw Error("Error in input")
+    }
   }
-  console.log(sql)
-  postData(uid, sql)
 }
 
-function append(){
+function append(uid, tableName, data){
+  if(!uid){
+    throw Error("No uid specified on function 'append'")
+  }
+  if(!tableName){
+    throw Error("No tableName specified on function 'append'")
+  }
+  if(!data){
+    throw Error("No data specified on function 'append'")
+  }
+  data = data.map(function(el){return `"${el}"`})
+  const sql = `INSERT INTO ${uid}_${tableName} VALUES (${data.join(",")})`
+  return parseOutput(uid, postData(uid, sql))
+}
+
+function get(uid, table, condition=true){
+  if(!uid || !table || !condition){
+    throw Error("Function 'get' is missing parameters 'uid' or 'table'")
+  }
+
+  if(condition==true){
+    const sql = `SELECT * FROM ${uid}_${table}`
+    return parseOutput(uid, postData(uid, sql))
+  } else {
+    const sql = `SELECT * FROM ${uid}_${table} WHERE ${condition[0]}="${condition[1]}"`
+    return parseOutput(uid, postData(uid, sql))
+  }
   
 }
 
-function get(uid, table, condition){
-  if(!uid){
-    throw Error("No uid specified on function 'get'")
+function del(uid, table, condition=true){
+  if(!uid || !table){
+    throw Error("Function 'del' is missing parameters 'uid' or 'table'")
   }
-  const sql = `SELECT * FROM ${uid}_${table} WHERE ${condition}`
-  console.log(sql)
-  //postData(uid, sql)
-}
-
-function replace(){
-
-}
-
-function del(){
-
+  if(condition==true){
+    const sql = `DELETE FROM ${uid}_${table}`;
+    return parseOutput(uid, postData(uid, sql))
+  } else {
+    const sql = `DELETE FROM ${uid}_${table} WHERE ${condition[0]}="${condition[1]}"`;
+    return parseOutput(uid, postData(uid, sql))
+  }
+  
 }
 
 function createTable(uid, name, cols){
+  if(!uid){
+    throw Error("Function 'createTable' is missing parameter 'uid'")
+  }
+  if(!name){
+    throw Error("Function 'createTable' is missing parameter 'name'")
+  }
+  if(!cols){
+    throw Error("Function 'createTable' is missing parameter 'cols'")
+  }
   cols.forEach(function(col){
       if(col.length>255){
         throw Error(`Error - could not create table '${name}' as element '${col.slice(0,6)}...' exceeded limit of 255 chars`)
@@ -60,16 +100,26 @@ function createTable(uid, name, cols){
 
   cols = cols.map(function(el){return el+" varChar(255)"})
   const sql = `CREATE TABLE ${uid}_${name} (${cols});`
-  console.log(sql)
-  postData(uid, sql)
+  return parseOutput(uid, postData(uid, sql))
 }	
 
-function DROPTABLE(){
-
+function DROPTABLE(uid, tableName){
+  if(!uid){
+    throw Error("Function 'DROPTABLE' is missing parameter 'uid'")
+  }
+  if(!tableName){
+    throw Error("Function 'DROPTABLE' is missing parameter 'tableName'")
+  }
+  const sql = `DROP TABLE ${uid}_${tableName}`
+  console.log(sql)
+  return parseOutput(uid, postData(uid, sql))
 }
 
-get("CONQ99", "Persons", "LastName='Nagpure'")
-//runSQL("CONQ99", "SELECT * FROM NewTableTest1")
-//console.log(createTable("ss", "arnav", ["username", "passwordpasswor", "uid", "gid", "guuji-ness"]))
-//console.log(createTable("CONQ99", "NewTableTest1", ["username", "passwordpasswor", "uid", "gid", "guuji_ness"]))
-//UID of ArnavN is "CONQ99"
+async function parseOutput(uid, output){
+  output = await output
+  if(output.includes("D1_ERROR")){
+    throw Error(output.replace('D1_ERROR:', "ERROR").replace(uid+"_", ""));
+  } else {
+    return JSON.parse(output)
+  }
+}
