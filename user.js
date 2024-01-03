@@ -123,3 +123,5 @@ async function parseOutput(uid, output){
     return JSON.parse(output)
   }
 }
+
+console.log("ArnavDB script loaded successfully")
