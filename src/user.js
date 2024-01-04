@@ -124,5 +124,4 @@ async function parseOutput(uid, output){
   }
 }
 
-//<script src="https://adb-docs.pages.dev/user.js"></script>
 console.log("ArnavDB script loaded successfully")
