@@ -68,6 +68,19 @@ function get(uid, table, condition=true){
   
 }
 
+function update(uid, table, data, condition=true){
+  if(!uid ||!table ||!data){
+    throw Error("Function 'update' is missing parameters 'uid' or 'table' or or 'data'")
+  }
+  if(condition==true){
+    const sql = `UPDATE ${uid}_${table} SET ${data[0]}="${data[1]}"`;
+    return parseOutput(uid, postData(uid, sql))
+  } else {
+    const sql = `UPDATE ${uid}_${table} SET ${data[0]}="${data[1]}" WHERE ${condition[0]}="${condition[1]}"`;
+    return parseOutput(uid, postData(uid, sql))
+  }
+}
+
 function del(uid, table, condition=true){
   if(!uid || !table){
     throw Error("Function 'del' is missing parameters 'uid' or 'table'")
@@ -125,3 +138,6 @@ async function parseOutput(uid, output){
 }
 
 console.log("ArnavDB script loaded successfully")
+
+console.log(await update("A99", "testTable", ['col1', 'Newest ipsum']))
+console.log(await get("A99", "testTable"))
