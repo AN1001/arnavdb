@@ -85,7 +85,7 @@ function del(uid, table, condition=true){
   if(!uid || !table){
     throw Error("Function 'del' is missing parameters 'uid' or 'table'")
   }
-  if(condition==true){
+  if(condition===true){
     const sql = `DELETE FROM ${uid}_${table}`;
     return parseOutput(uid, postData(uid, sql))
   } else {
@@ -138,6 +138,3 @@ async function parseOutput(uid, output){
 }
 
 console.log("ArnavDB script loaded successfully")
-
-console.log(await update("A99", "testTable", ['col1', 'Newest ipsum']))
-console.log(await get("A99", "testTable"))
